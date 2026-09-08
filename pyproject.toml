@@ -5,6 +5,7 @@ description = "Real-time eye tracking and gesture recognition using a webcam."
 requires-python = ">=3.11"
 dependencies = [
     "opencv-python",
+    "mediapipe",
 ]
 
 [build-system]
