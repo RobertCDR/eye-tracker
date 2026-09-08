@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from mediapipe.tasks.python.components.containers import NormalizedLandmark
-from .landmarks import LEFT_EYE, RIGHT_EYE
 
 @dataclass
 class EyeFeatures:
@@ -62,6 +61,25 @@ def extract_eye_features(
         eye_definitions: dict[str, int],
         iris_center_index: int
 ) -> EyeFeatures:
+
+    required_indices = [
+        eye_definitions["outer_corner"],
+        eye_definitions["inner_corner"],
+        eye_definitions["top"],
+        eye_definitions["bottom"],
+        iris_center_index
+    ]
+
+    if (
+        not landmarks
+        or any(index < 0 or index >= len(landmarks) for index in required_indices)
+    ):
+        return EyeFeatures(
+            horizontal_position=0.0,
+            vertical_position=0.0,
+            openness=0.0,
+            valid=False
+        )
 
     outer_corner = landmarks[eye_definitions["outer_corner"]]
     inner_corner = landmarks[eye_definitions["inner_corner"]]

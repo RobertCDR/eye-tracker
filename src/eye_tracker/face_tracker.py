@@ -1,4 +1,5 @@
 import time
+import cv2
 
 import mediapipe as mp
 
@@ -20,11 +21,13 @@ class FaceTracker:
         self._start_time = time.perf_counter()
 
     def process(self, frame) -> list:
-            rgb_frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
 
             timestamp_ms = int((time.perf_counter() - self._start_time) * 1000)
 
-            result = self._face_landmarker.detect_for_video(rgb_frame, timestamp_ms)
+            result = self._face_landmarker.detect_for_video(image, timestamp_ms)
 
             if not result.face_landmarks:
                 return []
