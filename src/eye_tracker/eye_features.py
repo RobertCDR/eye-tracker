@@ -3,6 +3,8 @@ from mediapipe.tasks.python.components.containers import NormalizedLandmark
 
 @dataclass
 class EyeFeatures:
+    iris_x: float
+    iris_y: float
     horizontal_position: float
     vertical_position: float
     openness: float
@@ -75,6 +77,8 @@ def extract_eye_features(
         or any(index < 0 or index >= len(landmarks) for index in required_indices)
     ):
         return EyeFeatures(
+            iris_x=0.0,
+            iris_y=0.0,
             horizontal_position=0.0,
             vertical_position=0.0,
             openness=0.0,
@@ -100,6 +104,8 @@ def extract_eye_features(
     openness = eye_height / eye_width
 
     return EyeFeatures(
+        iris_x=iris_center.x,
+        iris_y=iris_center.y,
         horizontal_position=horizontal_position,
         vertical_position=vertical_position,
         openness=openness,

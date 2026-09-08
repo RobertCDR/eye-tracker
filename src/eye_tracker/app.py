@@ -3,6 +3,7 @@ import cv2
 from eye_tracker.eye_tracker import EyeTracker
 from eye_tracker.face_tracker import FaceTracker
 
+from eye_tracker.visualization import draw_eye_tracking
 
 MODEL_PATH = "models/face_landmarker.task"
 
@@ -29,14 +30,7 @@ def main() -> None:
             if landmarks:
                 eye_tracking_result = eye_tracker.process(landmarks)
 
-                print(
-                    f"Left: H={eye_tracking_result.left_eye.horizontal_position:.3f}, "
-                    f"V={eye_tracking_result.left_eye.vertical_position:.3f}, "
-                    f"O={eye_tracking_result.left_eye.openness:.3f} | "
-                    f"Right: H={eye_tracking_result.right_eye.horizontal_position:.3f}, "
-                    f"V={eye_tracking_result.right_eye.vertical_position:.3f}, "
-                    f"O={eye_tracking_result.right_eye.openness:.3f}"
-                )
+                draw_eye_tracking(frame, eye_tracking_result)
 
                 cv2.imshow("Eye Tracker", frame)
 
