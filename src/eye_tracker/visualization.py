@@ -40,3 +40,18 @@ def draw_eye_tracking(
         (255, 255, 255),
         2
     )
+
+
+def draw_gaze_estimation(
+        frame,
+        horizontal_position: float,
+        vertical_position: float,
+        valid: bool,
+) -> None:
+    height, width, _ = frame.shape
+
+    if valid:
+        gaze_x = int(horizontal_position * width)
+        gaze_y = int(vertical_position * height)
+
+        cv2.circle(frame, (gaze_x, gaze_y), 5, (0, 0, 255), -1)

@@ -3,7 +3,9 @@ import cv2
 from eye_tracker.eye_tracker import EyeTracker
 from eye_tracker.face_tracker import FaceTracker
 
-from eye_tracker.visualization import draw_eye_tracking
+from eye_tracker.gaze_estimator import GazeEstimator
+
+from eye_tracker.visualization import draw_eye_tracking, draw_gaze_estimation
 
 MODEL_PATH = "models/face_landmarker.task"
 
@@ -16,6 +18,7 @@ def main() -> None:
 
     face_tracker = FaceTracker(MODEL_PATH)
     eye_tracker = EyeTracker()
+    gaze_estimator = GazeEstimator()
 
     try:
         while True:
@@ -30,7 +33,10 @@ def main() -> None:
             if landmarks:
                 eye_tracking_result = eye_tracker.process(landmarks)
 
+                gaze_result = gaze_estimator.process(eye_tracking_result)
+
                 draw_eye_tracking(frame, eye_tracking_result)
+                draw_gaze_estimation(frame, gaze_result.horizontal_position, gaze_result.vertical_position, gaze_result.valid)
 
                 cv2.imshow("Eye Tracker", frame)
 

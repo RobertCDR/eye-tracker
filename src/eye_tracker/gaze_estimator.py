@@ -8,17 +8,39 @@ class GazeResult:
     valid: bool
 
 class GazeEstimator:
+    def __init__(
+            self,
+            smoothing: float = 0.2
+    ) -> None:
+        self.smoothing = smoothing
+        self._horizontal = 0.5
+        self._vertical = 0.5
+
     def process(
             self,
             eye_tracker_result: EyeTrackingResult
     ) -> GazeResult:
-        left_eye_features = eye_tracker_result.left_eye
-        right_eye_features = eye_tracker_result.right_eye
+        left_eye = eye_tracker_result.left_eye
+        right_eye = eye_tracker_result.right_eye
 
-        if not left_eye_features.valid or not right_eye_features.valid:
-            return GazeResult(horizontal_position=0.0, vertical_position=0.0, valid=False)
+        if not left_eye.valid or not right_eye.valid:
+            return GazeResult(
+                horizontal_position=self._horizontal,
+                vertical_position=self._vertical,
+                valid=False
+            )
 
-        horizontal_position = (left_eye_features.horizontal_position + right_eye_features.horizontal_position) / 2
-        vertical_position = (left_eye_features.vertical_position + right_eye_features.vertical_position) / 2
+        left_horizontal = 1.0 - left_eye.horizontal_position
+        right_horizontal = right_eye.horizontal_position
 
-        return GazeResult(horizontal_position=horizontal_position, vertical_position=vertical_position, valid=True)
+        horizontal_position = (left_horizontal + right_horizontal) / 2
+        vertical_position = (left_eye.vertical_position + right_eye.vertical_position) / 2
+
+        self._horizontal += self.smoothing * (horizontal_position - self._horizontal)
+        self._vertical += self.smoothing * (vertical_position - self._vertical)
+
+        return GazeResult(
+            horizontal_position=horizontal_position,
+            vertical_position=vertical_position,
+            valid=True
+        )
