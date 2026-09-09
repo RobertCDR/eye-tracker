@@ -43,8 +43,8 @@ def main() -> None:
     calibration_samples = []
     calibration_phase = "settling"  # can be "settling", "collecting", or "done"
     calibration_phase_start = time.perf_counter()
-    settling_duration = 0.5  # seconds
-    samples_per_point = 30
+    settling_duration = 1  # seconds
+    samples_per_point = 45
     calibration_finished = False
 
     # frame_count = 0
@@ -101,6 +101,9 @@ def main() -> None:
                     calibration_finished = True
 
                     gaze_mapper.fit(calibration)
+
+                    # calibration_error = gaze_mapper.calibration_error(calibration)
+                    # print(f"Calibration complete. Calibration error: {calibration_error:.2f} pixels")
 
                     cv2.destroyWindow("Calibration")
 

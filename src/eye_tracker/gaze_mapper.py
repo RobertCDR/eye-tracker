@@ -44,3 +44,22 @@ class GazeMapper:
         screen_y = int(gaze @ self._coefficients_y)
 
         return ScreenPosition(x=screen_x, y=screen_y, valid=True)
+
+
+    def calibration_error(self, calibration: Calibration) -> float:
+        if not self.calibrated:
+            raise RuntimeError("GazeMapper is not calibrated.")
+
+        total_error = 0.0
+
+        for sample in calibration.samples:
+            predicted_position = self.map(sample.gaze_x, sample.gaze_y)
+
+            error_x = predicted_position.x - sample.screen_x
+            error_y = predicted_position.y - sample.screen_y
+
+            error = (error_x ** 2 + error_y ** 2) ** 0.5
+            total_error += error
+
+        return total_error / len(calibration.samples)
+    
