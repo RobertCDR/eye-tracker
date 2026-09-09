@@ -6,6 +6,7 @@ from eye_tracker.eye_tracker import EyeTracker
 from eye_tracker.face_tracker import FaceTracker
 
 from eye_tracker.gaze_estimator import GazeEstimator
+from eye_tracker.gaze_mapper import GazeMapper
 
 from eye_tracker.visualization import draw_eye_tracking, draw_gaze_estimation
 
@@ -34,6 +35,8 @@ def main() -> None:
     cv2.setWindowProperty("Calibration", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     calibration = Calibration()
+    gaze_mapper = GazeMapper()
+
     points = generate_calibration_points(screen.width, screen.height)
     calibration.start(points)
 
@@ -96,6 +99,8 @@ def main() -> None:
 
                 if calibration.complete and not calibration_finished:
                     calibration_finished = True
+
+                    gaze_mapper.fit(calibration)
 
                     cv2.destroyWindow("Calibration")
 

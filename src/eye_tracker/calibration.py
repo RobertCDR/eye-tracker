@@ -60,6 +60,7 @@ class Calibration:
         if not gaze_samples:
             raise ValueError("No gaze samples provided.")
 
+        # Calculate the average gaze position from the provided samples
         average_gaze_x = sum(sample[0] for sample in gaze_samples) / len(gaze_samples)
         average_gaze_y = sum(sample[1] for sample in gaze_samples) / len(gaze_samples)
 
