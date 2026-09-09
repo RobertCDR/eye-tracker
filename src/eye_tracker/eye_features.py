@@ -33,29 +33,35 @@ def _normalized_horizontal_position(
     eye_length_squared = eye_x ** 2 + eye_y ** 2
 
     if eye_length_squared == 0:
-        raise ValueError("Eye length is zero, cannot compute horizontal position.")
+        raise ValueError("Eye corners must not overlap.")
 
     return (iris_x * eye_x + iris_y * eye_y) / eye_length_squared
 
 
 def _normalized_vertical_position(
         iris: NormalizedLandmark, # type: ignore
-        top: NormalizedLandmark, # type: ignore
-        bottom: NormalizedLandmark # type: ignore
+        outer_corner: NormalizedLandmark, # type: ignore
+        inner_corner: NormalizedLandmark # type: ignore
 ) -> float:
 
-    eye_x = bottom.x - top.x
-    eye_y = bottom.y - top.y
+    eye_x = inner_corner.x - outer_corner.x
+    eye_y = inner_corner.y - outer_corner.y
 
-    iris_x = iris.x - top.x
-    iris_y = iris.y - top.y
+    eye_width = (eye_x ** 2 + eye_y ** 2) ** 0.5
 
-    eye_length_squared = eye_x ** 2 + eye_y ** 2
+    if eye_width == 0:
+        raise ValueError("Eye corners must not overlap.")
 
-    if eye_length_squared == 0:
-        raise ValueError("Eye length is zero, cannot compute vertical position.")
+    center_x = (outer_corner.x + inner_corner.x) / 2
+    center_y = (outer_corner.y + inner_corner.y) / 2
 
-    return (iris_x * eye_x + iris_y * eye_y) / eye_length_squared
+    iris_x = iris.x - center_x
+    iris_y = iris.y - center_y
+
+    vertical_x = -eye_y / eye_width
+    vertical_y = eye_x / eye_width
+
+    return 0.5 + (iris_x * vertical_x + iris_y * vertical_y) / eye_width
 
 
 def extract_eye_features(
@@ -97,7 +103,7 @@ def extract_eye_features(
         raise ValueError("Eye width is zero, cannot compute features.")
 
     horizontal_position = _normalized_horizontal_position(iris_center, outer_corner, inner_corner)
-    vertical_position = _normalized_vertical_position(iris_center, top, bottom)
+    vertical_position = _normalized_vertical_position(iris_center, outer_corner, inner_corner)
 
     eye_height = _distance(top, bottom)
 
@@ -109,5 +115,5 @@ def extract_eye_features(
         horizontal_position=horizontal_position,
         vertical_position=vertical_position,
         openness=openness,
-        valid=openness > 0.25
+        valid=openness > 0.10
     )

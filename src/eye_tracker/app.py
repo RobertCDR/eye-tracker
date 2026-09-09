@@ -20,8 +20,12 @@ def main() -> None:
     eye_tracker = EyeTracker()
     gaze_estimator = GazeEstimator()
 
+    frame_count = 0
+    print_every = 10
+
     try:
         while True:
+            frame_count += 1
             ret, frame = camera.read()
 
             if not ret:
@@ -36,7 +40,30 @@ def main() -> None:
                 gaze_result = gaze_estimator.process(eye_tracking_result)
 
                 draw_eye_tracking(frame, eye_tracking_result)
-                draw_gaze_estimation(frame, gaze_result.horizontal_position, gaze_result.vertical_position, gaze_result.valid)
+                draw_gaze_estimation(
+                    frame,
+                    gaze_result.raw_horizontal_position,
+                    gaze_result.raw_vertical_position,
+                    gaze_result.horizontal_position,
+                    gaze_result.vertical_position,
+                    gaze_result.valid
+                )
+
+                if frame_count % print_every == 0:
+                    left_eye = eye_tracking_result.left_eye
+                    right_eye = eye_tracking_result.right_eye
+
+                    print(
+                        f"L: H={left_eye.horizontal_position:.3f} "
+                        f"V={left_eye.vertical_position:.3f} "
+                        f"Open={left_eye.openness:.3f} | "
+                        f"R: H={right_eye.horizontal_position:.3f} "
+                        f"V={right_eye.vertical_position:.3f} "
+                        f"Open={right_eye.openness:.3f} | "
+                        f"Gaze: H={gaze_result.horizontal_position:.3f} "
+                        f"V={gaze_result.vertical_position:.3f} "
+                        f"Valid={gaze_result.valid}"
+                    )
 
                 cv2.imshow("Eye Tracker", frame)
 
