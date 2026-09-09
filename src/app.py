@@ -9,9 +9,11 @@ from eye_tracker.gaze_estimator import GazeEstimator
 from eye_tracker.gaze_mapper import GazeMapper
 
 from eye_tracker.visualization import draw_eye_tracking, draw_gaze_estimation
-
 from eye_tracker.calibration_visualization import draw_calibration_frame
+from eye_tracker.gaze_visualization import create_gaze_frame
+
 from eye_tracker.screen import Screen
+
 from eye_tracker.calibration import Calibration, generate_calibration_points
 
 
@@ -34,6 +36,9 @@ def main() -> None:
     cv2.namedWindow("Calibration", cv2.WINDOW_NORMAL)
     cv2.setWindowProperty("Calibration", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
+    cv2.namedWindow("Gaze", cv2.WINDOW_NORMAL)
+    cv2.setWindowProperty("Gaze", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
     calibration = Calibration()
     gaze_mapper = GazeMapper()
 
@@ -41,18 +46,14 @@ def main() -> None:
     calibration.start(points)
 
     calibration_samples = []
-    calibration_phase = "settling"  # can be "settling", "collecting", or "done"
+    calibration_phase = "settling"  # can be "settling" or "collecting"
     calibration_phase_start = time.perf_counter()
     settling_duration = 1  # seconds
     samples_per_point = 45
     calibration_finished = False
 
-    # frame_count = 0
-    # print_every = 10
-
     try:
         while True:
-            # frame_count += 1
             ret, frame = camera.read()
 
             if not ret:
@@ -108,9 +109,13 @@ def main() -> None:
                     cv2.destroyWindow("Calibration")
 
                     print("Calibration complete.")
-                    for sample in calibration.samples:
-                        print(f"Screen: ({sample.screen_x}, {sample.screen_y}) "
-                              f"Gaze: ({sample.gaze_x:.3f}, {sample.gaze_y:.3f})")
+
+                if calibration_finished and gaze_result.valid:
+                    screen_position = gaze_mapper.map(gaze_result.horizontal_position, gaze_result.vertical_position)
+
+                    gaze_frame = create_gaze_frame(screen.width, screen.height, screen_position.x, screen_position.y)
+
+                    cv2.imshow("Gaze", gaze_frame)
 
                 draw_eye_tracking(frame, eye_tracking_result)
                 draw_gaze_estimation(
@@ -122,25 +127,7 @@ def main() -> None:
                     gaze_result.valid
                 )
 
-                # debug purposes only, prints the eye tracking and gaze estimation results every `print_every` frames
-                # if frame_count % print_every == 0:
-                #     frame_count = 0
-                #     left_eye = eye_tracking_result.left_eye
-                #     right_eye = eye_tracking_result.right_eye
-
-                #     print(
-                #         # f"L: H={left_eye.horizontal_position:.3f} "
-                #         # f"V={left_eye.vertical_position:.3f} "
-                #         # f"Open={left_eye.openness:.3f} | "
-                #         # f"R: H={right_eye.horizontal_position:.3f} "
-                #         # f"V={right_eye.vertical_position:.3f} "
-                #         # f"Open={right_eye.openness:.3f} | "
-                #         # f"Gaze: H={gaze_result.horizontal_position:.3f} "
-                #         # f"V={gaze_result.vertical_position:.3f} "
-                #         # f"Valid={gaze_result.valid}"
-                #     )
-
-                cv2.imshow("Eye Tracker", frame)
+                # cv2.imshow("Eye Tracker", frame)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
