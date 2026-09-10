@@ -36,9 +36,6 @@ def main() -> None:
     cv2.namedWindow("Calibration", cv2.WINDOW_NORMAL)
     cv2.setWindowProperty("Calibration", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
-    cv2.namedWindow("Gaze", cv2.WINDOW_NORMAL)
-    cv2.setWindowProperty("Gaze", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-
     calibration = Calibration()
     gaze_mapper = GazeMapper()
 
@@ -107,6 +104,9 @@ def main() -> None:
                     # print(f"Calibration complete. Calibration error: {calibration_error:.2f} pixels")
 
                     cv2.destroyWindow("Calibration")
+
+                    cv2.namedWindow("Gaze", cv2.WINDOW_NORMAL)
+                    cv2.setWindowProperty("Gaze", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
                     print("Calibration complete.")
 
